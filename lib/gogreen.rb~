@@ -74,10 +74,10 @@ class GoGreen
     records
   end
 
-  def pxread(buffer, site, subdomain)
+  def pxread(alias_file, site, subdomain)
 
     px = Polyrex.new    
-    px.parse buffer
+    px.parse buffer2
 
     a = px.rxpath "site[label='#{site}']/subdomain[label='#{subdomain}']"
     raise GoGreenException, "site not found " if a.empty?
@@ -91,9 +91,15 @@ end
 
 if $0 == __FILE__ then
 
-  alias_file, alias_name, *job_args =  ARV
+  aliases_file, args = ARGV
 
-  gg = GoGreen.new alias_file
-  gg.execute alias_name, job_args  
+  gg = GoGreen.new aliases_file
+
+  if args.is_a?(String) then
+    puts gg.execute alias_name=args
+  else
+    alias_name = args.shift
+    puts gg.execute alias_name, args
+  end
 
 end
