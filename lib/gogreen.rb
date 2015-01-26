@@ -5,6 +5,7 @@
 require 'rscript'
 require 'dynarex'
 require 'acronym'
+require 'polyrex'
 
 
 class GoGreenException < Exception
