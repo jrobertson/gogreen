@@ -5,6 +5,7 @@
 require 'rscript'
 require 'dynarex'
 require 'acronym'
+require 'polyrex'
 
 
 class GoGreenException < Exception
@@ -17,7 +18,7 @@ class GoGreen
     buffer = RXFHelper.read(alias_file).first
     
     name = case buffer
-    when /^<\?dynarex/ 
+    when /^<\?dynarex/
       @records = dxread(buffer)
     when /^<\?polyrex/ 
       @records, @conf = pxread(buffer, site, subdomain)
@@ -64,8 +65,7 @@ class GoGreen
 
     records = if dx.summary.include? :include then
 
-      buffer = RXFHelper.read(dx.summary[:include]).first
-      dx2 = Dynarex.new.parse buffer
+      dx2 = Dynarex.new.parse dx.summary[:include]
       dx2.records.merge(dx.records)
     else    
       dx.records
