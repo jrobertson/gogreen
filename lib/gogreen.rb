@@ -57,7 +57,8 @@ class GoGreen
         file.write(code2)
         file.close
         
-        system("ruby #{file.path}")
+        r = `ruby #{file.path}`
+        r.strip
         #pipe = IO.popen("ruby", "w")
         #pipe.write code2
         #pipe.close        

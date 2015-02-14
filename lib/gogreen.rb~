@@ -47,9 +47,8 @@ class GoGreen
 
       begin
 
-        
         a = raw_code.strip.lines
-        a.unshift 'args = ' + args.inspect
+        a.unshift 'args = ' + args.inspect + "\n\n"
         lastline = a.pop
         a.push('puts ' + lastline)
         code2 = a.join.gsub('\"','"').gsub('\#','#')
@@ -57,9 +56,8 @@ class GoGreen
         file = Tempfile.new('gogreen')        
         file.write(code2)
         file.close
-        File.write '/tmp/fun.txt', code2
         
-        `ruby #{file.path}`
+        system("ruby #{file.path}")
         #pipe = IO.popen("ruby", "w")
         #pipe.write code2
         #pipe.close        
