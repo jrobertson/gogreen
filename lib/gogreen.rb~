@@ -6,6 +6,7 @@ require 'rscript'
 require 'dynarex'
 require 'acronym'
 require 'polyrex'
+require 'tempfile'
 
 
 class GoGreenException < Exception
@@ -42,10 +43,28 @@ class GoGreen
         x.sub(/^["'](.*)["']$/,'\1') 
       end
       
-      code2, args = RScript.new.read a
+      raw_code, args = RScript.new.read a
 
       begin
-        eval(code2)
+
+        
+        a = raw_code.strip.lines
+        a.unshift 'args = ' + args.inspect
+        lastline = a.pop
+        a.push('puts ' + lastline)
+        code2 = a.join.gsub('\"','"').gsub('\#','#')
+        
+        file = Tempfile.new('gogreen')        
+        file.write(code2)
+        file.close
+        File.write '/tmp/fun.txt', code2
+        
+        `ruby #{file.path}`
+        #pipe = IO.popen("ruby", "w")
+        #pipe.write code2
+        #pipe.close        
+
+        #eval(code2)
       rescue
         ($!).to_s[/^[^\n]+/].to_s
       end   
