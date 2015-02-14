@@ -68,7 +68,7 @@ class GoGreen
           
         else
           
-          eval(code2)
+          eval(raw_code)
         end
         
       rescue
