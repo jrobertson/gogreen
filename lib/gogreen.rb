@@ -14,8 +14,9 @@ end
 
 class GoGreen
 
-  def initialize(alias_file, site=nil, subdomain=nil)
+  def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true)
 
+    @shell_execute = shell_execute
     buffer = RXFHelper.read(alias_file).first
     
     name = case buffer
@@ -47,23 +48,29 @@ class GoGreen
 
       begin
 
-        a = raw_code.strip.lines
-        a.unshift 'args = ' + args.inspect + "\n\n"
-        lastline = a.pop
-        a.push('puts ' + lastline)
-        code2 = a.join.gsub('\"','"').gsub('\#','#')
+        if @shell_execute then
+          
+          a = raw_code.strip.lines
+          a.unshift 'args = ' + args.inspect + "\n\n"
+          lastline = a.pop
+          a.push('puts ' + lastline)
+          code2 = a.join.gsub('\"','"').gsub('\#','#')
+          
+          file = Tempfile.new('gogreen')        
+          file.write(code2)
+          file.close
+          
+          r = `ruby #{file.path}`
+          r.strip
+          #pipe = IO.popen("ruby", "w")
+          #pipe.write code2
+          #pipe.close        
+          
+        else
+          
+          eval(code2)
+        end
         
-        file = Tempfile.new('gogreen')        
-        file.write(code2)
-        file.close
-        
-        r = `ruby #{file.path}`
-        r.strip
-        #pipe = IO.popen("ruby", "w")
-        #pipe.write code2
-        #pipe.close        
-
-        #eval(code2)
       rescue
         ($!).to_s[/^[^\n]+/].to_s
       end   
