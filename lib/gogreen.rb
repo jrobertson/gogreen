@@ -15,8 +15,10 @@ end
 class GoGreen
 
   def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true)
+    super()
 
     @shell_execute = shell_execute
+
     buffer = RXFHelper.read(alias_file).first
     
     name = case buffer
@@ -28,6 +30,7 @@ class GoGreen
       raise GoGreenException, 'alias file ' + alias_file + ' not recognised'
     end
 
+
   end
 
   def execute(alias_name, job_args=[])
@@ -37,15 +40,15 @@ class GoGreen
     
     cmd = alias_found[:body][:command]
     cmd += ' ' + @conf if @conf
-
+    
     if cmd[/^rcscript/] then
 
       a = cmd.sub(/^rcscript /,'').split + job_args.map do |x| 
         x.sub(/^["'](.*)["']$/,'\1') 
       end
-      
-      raw_code, args = RScript.new.read a
 
+      raw_code, args = RScript.new.read a
+    
       begin
 
         if @shell_execute then
@@ -54,7 +57,8 @@ class GoGreen
           a.unshift 'args = ' + args.inspect + "\n\n"
           lastline = a.pop
           a.push('puts ' + lastline)
-          code2 = a.join.gsub('\"','"').gsub('\#','#')
+
+          code2 = "$0 = 'gogreen'\n" + a.join.gsub('\"','"').gsub('\#','#')
           
           file = Tempfile.new('gogreen')        
           file.write(code2)
@@ -67,8 +71,9 @@ class GoGreen
           #pipe.close        
           
         else
-          
-          eval(raw_code)
+
+          result = eval(raw_code)
+
         end
         
       rescue
@@ -102,14 +107,18 @@ class GoGreen
   def pxread(buffer, site, subdomain)
 
     px = Polyrex.new    
+
     px.parse buffer
 
     a = px.rxpath "site[label='#{site}']/subdomain[label='#{subdomain}']"
+
     raise GoGreenException, "site not found " if a.empty?
 
     rec = a.first
 
-    [rec.to_dynarex.records, rec.conf]
+    r = [rec.to_dynarex.records, rec.conf]
+
+    r
   end
   
 end
