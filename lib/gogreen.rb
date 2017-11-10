@@ -14,10 +14,12 @@ end
 
 class GoGreen
 
-  def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true)
+  def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true, 
+                 rsc: nil)
+    
     super()
 
-    @shell_execute = shell_execute
+    @shell_execute, @rsc = shell_execute, rsc
 
     buffer = RXFHelper.read(alias_file).first
     
@@ -63,7 +65,7 @@ class GoGreen
           file = Tempfile.new('gogreen')        
           file.write(code2)
           file.close
-          
+
           r = `ruby #{file.path}`
           r.strip
           #pipe = IO.popen("ruby", "w")
@@ -80,6 +82,11 @@ class GoGreen
         ($!).to_s[/^[^\n]+/].to_s
       end   
    
+    elsif cmd[/^rsc/] and @rsc
+      
+      package, job, args = cmd.sub(/^rsc/,'').split + job_args
+      @rsc.send(package.to_sym).send(job.to_sym, *args)
+      
     else    
       `#{cmd} #{job_args.join(' ')}`
     end      
