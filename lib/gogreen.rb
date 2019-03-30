@@ -9,19 +9,30 @@ require 'polyrex'
 require 'tempfile'
 
 
+
+class Gg
+  
+  def self.call(argsx)    
+    puts GoGreen.new(argsx.first).execute(argsx[1], argsx[2..-1]).to_s    
+  end 
+  
+  def self.run(argsx)    
+    puts GoGreen.new(argsx.first).execute(argsx[1], argsx[2..-1]).to_s    
+  end      
+  
+end
+
 class GoGreenException < Exception
 end
 
 class GoGreen
 
-  def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true, 
-                 rsc: nil)
-    
+  def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true, rsc: nil)
     super()
 
     @shell_execute, @rsc = shell_execute, rsc
 
-    buffer = RXFHelper.read(alias_file).first
+    buffer = RXFHelper.read(alias_file, auto: false).first
     
     name = case buffer
     when /^<\?dynarex/
@@ -65,7 +76,7 @@ class GoGreen
           file = Tempfile.new('gogreen')        
           file.write(code2)
           file.close
-
+          puts 'before ruby'
           r = `ruby #{file.path}`
           r.strip
           #pipe = IO.popen("ruby", "w")
