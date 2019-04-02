@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = 'gogreen'
-  s.version = '0.3.0'
+  s.version = '0.3.1'
   s.summary = 'Run RSF jobs from the command line using a Dynarex flavoured ' + 
       'aliases file.'
   s.authors = ['James Robertson']

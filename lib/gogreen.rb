@@ -30,7 +30,7 @@ class GoGreen
   def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true, rsc: nil)
     super()
 
-    @shell_execute, @rsc = shell_execute, rsc
+    @shell_execute, @rsc, @alias_file = shell_execute, rsc, alias_file
 
     buffer = RXFHelper.read(alias_file, auto: false).first
     
@@ -71,7 +71,9 @@ class GoGreen
           lastline = a.pop
           a.push('puts ' + lastline)
 
-          code2 = "$0 = 'gogreen'\n" + a.join.gsub('\"','"').gsub('\#','#')
+          var = '$alias_file = ' + @alias_file.inspect
+          code2 = "$0 = 'gogreen'\n" + var +"\n" + a.join.gsub('\"','"')\
+              .gsub('\#','#')
           
           file = Tempfile.new('gogreen')        
           file.write(code2)
