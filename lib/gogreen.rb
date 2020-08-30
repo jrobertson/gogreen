@@ -16,8 +16,9 @@ class Gg
     puts GoGreen.new(argsx.first).execute(argsx[1], argsx[2..-1]).to_s    
   end 
   
-  def self.run(argsx)    
-    puts GoGreen.new(argsx.first).execute(argsx[1], argsx[2..-1]).to_s    
+  def self.run(argsx, keepalive: false)    
+    puts GoGreen.new(argsx.first, keepalive: keepalive)\
+        .execute(argsx[1], argsx[2..-1]).to_s    
   end      
   
 end
@@ -27,10 +28,12 @@ end
 
 class GoGreen
 
-  def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true, rsc: nil)
+  def initialize(alias_file, site=nil, subdomain=nil, shell_execute: true, 
+                 rsc: nil, keepalive: false)
     super()
 
     @shell_execute, @rsc, @alias_file = shell_execute, rsc, alias_file
+    @keepalive = keepalive
 
     buffer = RXFHelper.read(alias_file, auto: false).first
     
@@ -76,7 +79,8 @@ class GoGreen
               .gsub('\#','#')
           
           file = Tempfile.new('gogreen')        
-          file.write(code2)
+          code3 = @keepalive ? apply_handler(code2) : code2
+          file.write(code3)
           file.close
           puts 'before ruby'
           r = `ruby #{file.path}`
@@ -87,7 +91,8 @@ class GoGreen
           
         else
 
-          result = eval(raw_code)
+          code3 = @keepalive ? apply_handler(raw_code) : raw_code
+          result = eval(code3)
 
         end
         
@@ -107,6 +112,15 @@ class GoGreen
   end
 
   private
+  
+  def apply_handler(s)
+    
+    "begin
+      #{s}
+    rescue
+      retry
+    end"
+  end
 
   def dxread(s)
 
